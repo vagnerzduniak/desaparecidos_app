@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Pessoas Desaparecidas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #mapa {
+            height: 300px;
+            width: 100%;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .bg-gradient-custom {
+            background: linear-gradient(to bottom, #fde68a, #fca5a5); /* Amarelo claro para vermelho claro */
+        }
+        .bg-gradient-reverse {
+            background: linear-gradient(to top, #fde68a, #fca5a5);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 bg-gradient-custom">
+    <header class="bg-red-500 text-white py-4 flex justify-between items-center shadow-md sticky top-0 z-10 rounded-md">
+        <div class="logo text-xl font-bold ml-4">
+            <i class="fas fa-search text-yellow-400 mr-2"></i>
+            <span class="text-yellow-400">Encontre</span> Desaparecidos
+        </div>
+        <nav class="mr-4">
+            <ul class="flex space-x-4">
+                <li><a href="#cadastro" class="hover:text-yellow-300 no-underline">Cadastrar Desaparecido</a></li>
+                <li><a href="#avistamentos" class="hover:text-yellow-300 no-underline">Relatar Avistamento</a></li>
+                <li><a href="#casos" class="hover:text-yellow-300 no-underline">Casos</a></li>
+                <li><a href="#sobre" class="hover:text-yellow-300 no-underline">Sobre</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="cadastro" class="container mx-auto py-8 px-4 rounded-md bg-gradient-reverse">
+        <h2 class="text-3xl font-semibold text-gray-800 text-center mb-6">Cadastrar Desaparecido</h2>
+        <form id="cadastroForm" class="bg-white shadow-md rounded-lg p-6 space-y-4">
+            <div>
+                <label for="nome" class="block text-gray-700 text-sm font-bold mb-2">Nome Completo:</label>
+                <input type="text" id="nome" name="nome" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="apelido" class="block text-gray-700 text-sm font-bold mb-2">Apelido:</label>
+                <input type="text" id="apelido" name="apelido" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="data_nascimento" class="block text-gray-700 text-sm font-bold mb-2">Data de Nascimento:</label>
+                    <input type="date" id="data_nascimento" name="data_nascimento" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <div>
+                    <label for="sexo" class="block text-gray-700 text-sm font-bold mb-2">Sexo:</label>
+                    <select id="sexo" name="sexo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                        <option value="">Selecione</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="feminino">Feminino</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label for="local_origem" class="block text-gray-700 text-sm font-bold mb-2">Local de Origem:</label>
+                <input type="text" id="local_origem" name="local_origem" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="cidade_atual" class="block text-gray-700 text-sm font-bold mb-2">Cidade Atual:</label>
+                <input type="text" id="cidade_atual" name="cidade_atual" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+             <div>
+                <label for="ultimo_local_visto" class="block text-gray-700 text-sm font-bold mb-2">Último Local Visto:</label>
+                <input type="text" id="ultimo_local_visto" name="ultimo_local_visto" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="caracteristicas" class="block text-gray-700 text-sm font-bold mb-2">Características Físicas:</label>
+                <textarea id="caracteristicas" name="caracteristicas" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32 resize-y"></textarea>
+            </div>
+            <div>
+                <label for="deficiencia" class="block text-gray-700 text-sm font-bold mb-2">Portador de Deficiência:</label>
+                <select id="deficiencia" name="deficiencia" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    <option value="">Selecione</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                </select>
+            </div>
+            <div>
+                <label for="nome_pais" class="block text-gray-700 text-sm font-bold mb-2">Nome dos Pais:</label>
+                <input type="text" id="nome_pais" name="nome_pais" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="marcas_nascenca" class="block text-gray-700 text-sm font-bold mb-2">Marcas de Nascença:</label>
+                <textarea id="marcas_nascenca" name="marcas_nascenca" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-20 resize-y"></textarea>
+            </div>
+            <div>
+                <label for="tatuagens" class="block text-gray-700 text-sm font-bold mb-2">Tatuagens:</label>
+                <textarea id="tatuagens" name="tatuagens" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-20 resize-y"></textarea>
+            </div>
+            <div>
+                <label for="foto" class="block text-gray-700 text-sm font-bold mb-2">Foto:</label>
+                <input type="file" id="foto" name="foto" accept="image/*" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="depoimento_audio" class="block text-gray-700 text-sm font-bold mb-2">Depoimento em Áudio:</label>
+                <input type="file" id="depoimento_audio" name="depoimento_audio" accept="audio/*" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label for="depoimento_escrito" class="block text-gray-700 text-sm font-bold mb-2">Depoimento Escrito:</label>
+                <textarea id="depoimento_escrito" name="depoimento_escrito" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32 resize-y" required></textarea>
+            </div>
+            <div>
+                <label for="video" class="block text-gray-700 text-sm font-bold mb-2">Vídeo:</label>
+                <input type="file" id="video" name="video" accept="video/*" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <i class="fas fa-plus mr-2"></i> Cadastrar Desaparecido
+            </button>
+        </form>
+    </section>
+
+    <section id="avistamentos" class="container mx-auto py-8 px-4 bg-gray-50 rounded-md">
+        <h2 class="text-3xl font-semibold text-gray-800 text-center mb-6">Relatar Avistamento</h2>
+        <form id="avistamentoForm" class="bg-white shadow-md rounded-lg p-6 space-y-4">
+            <div>
+                <label for="nome_desaparecido_avistamento" class="block text-gray-700 text-sm font-bold mb-2">Nome do Desaparecido:</label>
+                <input type="text" id="nome_desaparecido_avistamento" name="nome_desaparecido_avistamento" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                 <datalist id="desaparecidos_lista">
+                    </datalist>
+            </div>
+            <div>
+                <label for="local_avistamento" class="block text-gray-700 text-sm font-bold mb-2">Local do Avistamento:</label>
+                <input type="text" id="local_avistamento" name="local_avistamento" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="data_avistamento" class="block text-gray-700 text-sm font-bold mb-2">Data do Avistamento:</label>
+                <input type="date" id="data_avistamento" name="data_avistamento" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="hora_avistamento" class="block text-gray-700 text-sm font-bold mb-2">Hora do Avistamento:</label>
+                <input type="time" id="hora_avistamento" name="hora_avistamento" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="descricao_avistamento" class="block text-gray-700 text-sm font-bold mb-2">Descrição do Avistamento:</label>
+                <textarea id="descricao_avistamento" name="descricao_avistamento" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32 resize-y" required></textarea>
+            </div>
+             <div>
+                <label for="contato_avistamento" class="block text-gray-700 text-sm font-bold mb-2">Seu Contato (Telefone ou Email):</label>
+                <input type="text" id="contato_avistamento" name="contato_avistamento"  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div>
+                <label for="foto_avistamento" class="block text-gray-700 text-sm font-bold mb-2">Foto do Avistamento:</label>
+                <input type="file" id="foto_avistamento" name="foto_avistamento" accept="image/*" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <button id="tirar_foto_avistamento" type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2">
+                    <i class="fas fa-camera mr-2"></i> Tirar Foto
+                </button>
+            </div>
+            <div>
+                <label for="video_avistamento" class="block text-gray-700 text-sm font-bold mb-2">Vídeo do Avistamento:</label>
+                <input type="file" id="video_avistamento" name="video_avistamento" accept="video/*" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <button id="gravar_video_avistamento" type="button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2">
+                    <i class="fas fa-video mr-2"></i> Gravar Vídeo
+                </button>
+            </div>
+            <div id="mapa" class="w-full h-48 rounded-md"></div>
+            <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                 <i class="fas fa-eye mr-2"></i> Relatar Avistamento
+            </button>
+        </form>
+    </section>
+
+    <section id="casos" class="container mx-auto py-8 px-4 rounded-md">
+        <h2 class="text-3xl font-semibold text-gray-800 text-center mb-6">Casos de Desaparecidos</h2>
+        <div id="casosLista" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+         <div class="mt-8 text-center">
+            <button id="verMaisCasos" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Ver Mais Casos
+            </button>
+        </div>
+    </section>
+
+    <section id="sobre" class="container mx-auto py-8 px-4 bg-gray-50 rounded-md">
+        <h2 class="text-3xl font-semibold text-gray-800 text-center mb-6">Sobre a Plataforma</h2>
+        <p class="text-gray-700 text-lg text-justify">
+            A Plataforma de Pessoas Desaparecidas é uma iniciativa dedicada a reunir e divulgar informações sobre pessoas desaparecidas,
+            facilitando o cruzamento de dados e o contato entre a comunidade, familiares e autoridades. Nosso objetivo é aumentar as chances
+            de encontrar pessoas desaparecidas e oferecer apoio às famílias que passam por essa difícil situação.
+        </p>
+        <div class="mt-6">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Como Funciona</h3>
+            <ul class="list-disc list-inside text-gray-700 text-lg space-y-2">
+                <li><strong>Cadastro de Desaparecidos:</strong> Qualquer pessoa pode cadastrar um caso de desaparecimento, fornecendo o máximo de informações possível.</li>
+                <li><strong>Relato de Avistamentos:</strong> A comunidade pode relatar avistamentos de pessoas desaparecidas, informando local, data, hora e descrição.</li>
+                <li><strong>Cruzamento de Dados:</strong> A plataforma utiliza os dados fornecidos para cruzar informações e identificar possíveis correspondências.</li>
+                <li><strong>Divulgação de Casos:</strong> Os casos são divulgados na plataforma e em redes sociais para alcançar o maior número de pessoas possível.</li>
+                <li><strong>Apoio às Famílias:</strong> Oferecemos um espaço para depoimentos, fotos, vídeos e outras informações que possam ajudar na busca.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white py-4 text-center rounded-md">
+        <p>© 2024 Plataforma de Pessoas Desaparecidas. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+       const cadastroForm = document.getElementById('cadastroForm');
+        const avistamentoForm = document.getElementById('avistamentoForm');
+        const casosLista = document.getElementById('casosLista');
+        const listaDesaparecidos = document.getElementById('desaparecidos_lista');
+        const verMaisCasosBtn = document.getElementById('verMaisCasos');
+        const tirarFotoBtn = document.getElementById('tirar_foto_avistamento');
+        const gravarVideoBtn = document.getElementById('gravar_video_avistamento');
+        const fotoAvistamentoInput = document.getElementById('foto_avistamento');
+        const videoAvistamentoInput = document.getElementById('video_avistamento');
+
+
+        let casos = JSON.parse(localStorage.getItem('casosDesaparecidos')) || [];
+        let casosExibidos = 6;
+        let mapa;
+        let marcadores = [];
+        let fotoTirada;
+        let videoGravado;
+
+
+        function inicializarMapa() {
+            mapa = L.map('mapa').setView([-23.5505, -46.6333], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(mapa);
+        }
+
+        function exibirCasos() {
+            casosLista.innerHTML = '';
+            const casosParaExibir = casos.slice(0, casosExibidos);
+
+            casosParaExibir.forEach(caso => {
+                const casoElemento = document.createElement('div');
+                casoElemento.classList.add('bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'flex', 'flex-col', 'transition-transform', 'hover:scale-105');
+                casoElemento.innerHTML = `
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">${caso.nome}</h3>
+                    <p class="text-gray-700 mb-2"><strong>Apelido:</strong> ${caso.apelido || 'Não informado'}</p>
+                    <p class="text-gray-700 mb-2"><strong>Data de Nascimento:</strong> ${caso.data_nascimento}</p>
+                    <p class="text-gray-700 mb-2"><strong>Sexo:</strong> ${caso.sexo}</p>
+                    <p class="text-gray-700 mb-2"><strong>Local de Origem:</strong> ${caso.local_origem}</p>
+                    <p class="text-gray-700 mb-2"><strong>Cidade Atual:</strong> ${caso.cidade_atual}</p>
+                    <p class="text-gray-700 mb-2"><strong>Último Local Visto:</strong> ${caso.ultimo_local_visto}</p>
+                    <p class="text-gray-700 mb-2"><strong>Características:</strong> ${caso.caracteristicas}</p>
+                    <p class="text-gray-700 mb-2"><strong>Deficiência:</strong> ${caso.deficiencia}</p>
+                    <p class="text-gray-700 mb-2"><strong>Nome dos Pais:</strong> ${caso.nome_pais}</p>
+                     <p class="text-gray-700 mb-2"><strong>Marcas de Nascença:</strong> ${caso.marcas_nascenca}</p>
+                    <p class="text-gray-700 mb-2"><strong>Tatuagens:</strong> ${caso.tatuagens}</p>
+                    <img src="${caso.foto}" alt="Foto de ${caso.nome}" class="rounded-md mt-2 max-h-48 object-contain">
+                     ${caso.depoimento_audio ? `<audio controls class="mt-2"><source src="${caso.depoimento_audio}" type="audio/mpeg">Seu navegador não suporta o elemento de áudio.</audio>` : ''}
+                    <p class="text-gray-700 mb-2"><strong>Depoimento Escrito:</strong> ${caso.depoimento_escrito}</p>
+                    ${caso.video ? `<video controls class="mt-2 rounded-md max-h-48 object-contain"><source src="${caso.video}" type="video/mp4">Seu navegador não suporta o elemento de vídeo.</video>` : ''}
+                `;
+                casosLista.appendChild(casoElemento);
+
+                 const option = document.createElement('option');
+                option.value = caso.nome;
+                listaDesaparecidos.appendChild(option);
+            });
+             if (casosExibidos < casos.length) {
+                verMaisCasosBtn.style.display = 'block';
+            } else {
+                verMaisCasosBtn.style.display = 'none';
+            }
+        }
+
+
+
+        cadastroForm.addEventListener('submit', (event) => {
+            event.preventDefault();   
+        })
+
+            const nome = document.getElementById('nome').value;
+            const apelido = document.getElementById('apelido').value;
+            const data_nascimento = document.getElementById('data_nascimento').value;
+            const sexo = document.getElementById('sexo').value;
+            const local_origem = document.getElementById('local_origem').value;
+            const cidade_atual = document.getElementById('cidade_atual').value;
+            const ultimo_local_visto = document.getElementById('ultimo_local_visto').value;
+            const caracteristicas = document.getElementById('caracteristicas').value;
+            const deficiencia = document.getElementById('deficiencia').value;
+            const nome_pais = document.getElementById('nome_pais').value;
+            const marcas_nascenca = document.getElementById('marcas_nascenca').value;
+            const tatuagens = document.getElementById('tatuagens').value;
+            const fotoInput = document.getElementById('foto');
+            const depoimentoAudioInput = document.getElementById('depoimento_audio');
+            const depoimentoEscrito = document.getElementById('depoimento_escrito').value;
+            const videoInput = document.getElementById('video');
+         
+             
+            let foto = '';
+            let depoimento_audio = '';
+            let video = '';
+
+             if (fotoInput.files && fotoInput.files)[0]
+         
